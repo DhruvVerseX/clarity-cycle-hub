@@ -28,7 +28,6 @@ export function Dashboard({ onLogout }: DashboardProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="border-b border-border/50 bg-card/30 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -41,7 +40,6 @@ export function Dashboard({ onLogout }: DashboardProps) {
                 <p className="text-sm text-muted-foreground">Welcome back, User!</p>
               </div>
             </div>
-
             <div className="flex items-center gap-4">
               <Button variant="outline" size="sm" className="btn-ghost">
                 <Settings className="w-4 h-4 mr-2" />

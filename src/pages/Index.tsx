@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LandingPage } from "@/components/LandingPage";
+import  PomodoroLandingPage  from "@/components/LandingPage";
 import { Dashboard } from "@/components/Dashboard";
 
 const Index = () => {
@@ -17,7 +17,8 @@ const Index = () => {
     return <Dashboard onLogout={handleLogout} />;
   }
 
-  return <LandingPage onLogin={handleLogin} />;
+ 
+  return <PomodoroLandingPage onLogin={handleLogin} />;
 };
 
 export default Index;
