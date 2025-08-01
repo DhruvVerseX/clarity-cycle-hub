@@ -6,100 +6,54 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Plus, Check, Edit3, Trash2, Flag } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-  priority: 'low' | 'medium' | 'high';
-  pomodorosEstimated: number;
-  pomodorosCompleted: number;
-  createdAt: Date;
-}
+import { Plus, Check, Edit3, Trash2, Flag, Loader2 } from "lucide-react";
+import { useTasks } from "@/hooks/use-api";
+import { type Task as ApiTask } from "@/services/api";
 
 export function TaskBoard() {
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: '1',
-      title: 'Complete project proposal',
-      description: 'Draft and finalize the Q2 project proposal document',
-      completed: false,
-      priority: 'high',
-      pomodorosEstimated: 6,
-      pomodorosCompleted: 2,
-      createdAt: new Date()
-    },
-    {
-      id: '2',
-      title: 'Review code changes',
-      description: 'Review pull requests and provide feedback',
-      completed: true,
-      priority: 'medium',
-      pomodorosEstimated: 3,
-      pomodorosCompleted: 3,
-      createdAt: new Date()
-    }
-  ]);
+  const {
+    tasks,
+    isLoading,
+    error,
+    createTask,
+    updateTask,
+    deleteTask,
+    isCreating,
+    isUpdating,
+    isDeleting
+  } = useTasks();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [newTask, setNewTask] = useState({
-    title: '',
-    description: '',
-    priority: 'medium' as const,
-    pomodorosEstimated: 1
+    title: "",
+    description: "",
+    priority: "medium" as const,
+    status: "todo" as const
   });
-
-  const { toast } = useToast();
 
   const handleCreateTask = () => {
     if (!newTask.title.trim()) {
-      toast({
-        title: "Error",
-        description: "Task title is required",
-        variant: "destructive"
-      });
       return;
     }
 
-    const task: Task = {
-      id: Date.now().toString(),
+    createTask({
       title: newTask.title,
       description: newTask.description,
-      completed: false,
       priority: newTask.priority,
-      pomodorosEstimated: newTask.pomodorosEstimated,
-      pomodorosCompleted: 0,
-      createdAt: new Date()
-    };
-
-    setTasks(prev => [task, ...prev]);
-    setNewTask({ title: '', description: '', priority: 'medium', pomodorosEstimated: 1 });
-    setIsDialogOpen(false);
-    
-    toast({
-      title: "Task Created",
-      description: "Your new task has been added to the board"
+      status: newTask.status
     });
+
+    setNewTask({ title: "", description: "", priority: "medium", status: "todo" });
+    setIsDialogOpen(false);
   };
 
-  const handleToggleComplete = (taskId: string) => {
-    setTasks(prev => prev.map(task => 
-      task.id === taskId 
-        ? { ...task, completed: !task.completed }
-        : task
-    ));
+  const handleToggleComplete = (taskId: string, currentStatus: string) => {
+    const newStatus = currentStatus === "completed" ? "todo" : "completed";
+    updateTask({ id: taskId, updates: { status: newStatus } });
   };
 
   const handleDeleteTask = (taskId: string) => {
-    setTasks(prev => prev.filter(task => task.id !== taskId));
-    toast({
-      title: "Task Deleted",
-      description: "Task has been removed from your board"
-    });
+    deleteTask(taskId);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -120,8 +74,8 @@ export function TaskBoard() {
     }
   };
 
-  const completedTasks = tasks.filter(task => task.completed);
-  const pendingTasks = tasks.filter(task => !task.completed);
+  const completedTasks = tasks.filter(task => task.status === "completed");
+  const pendingTasks = tasks.filter(task => task.status !== "completed");
 
   return (
     <Card className="glass-card animate-fade-in">
@@ -180,27 +134,40 @@ export function TaskBoard() {
                 </div>
                 
                 <div>
-                  <Label htmlFor="task-pomodoros">Estimated Pomodoros</Label>
-                  <Input
-                    id="task-pomodoros"
-                    type="number"
-                    min="1"
-                    max="20"
-                    value={newTask.pomodorosEstimated}
-                    onChange={(e) => setNewTask(prev => ({ ...prev, pomodorosEstimated: parseInt(e.target.value) || 1 }))}
-                    className="bg-input/50 border-border/50"
-                  />
+                  <Label htmlFor="task-status">Status</Label>
+                  <select
+                    id="task-status"
+                    value={newTask.status}
+                    onChange={(e) => setNewTask(prev => ({ ...prev, status: e.target.value as any }))}
+                    className="w-full p-2 rounded-md bg-input/50 border border-border/50 text-foreground"
+                  >
+                    <option value="todo">To Do</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                  </select>
                 </div>
               </div>
               
               <div className="flex gap-2 pt-4">
-                <Button onClick={handleCreateTask} className="btn-focus flex-1">
-                  Create Task
+                <Button 
+                  onClick={handleCreateTask} 
+                  className="btn-focus flex-1"
+                  disabled={isCreating}
+                >
+                  {isCreating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Task"
+                  )}
                 </Button>
                 <Button
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
                   className="btn-ghost"
+                  disabled={isCreating}
                 >
                   Cancel
                 </Button>
@@ -211,21 +178,41 @@ export function TaskBoard() {
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <span className="ml-2 text-muted-foreground">Loading tasks...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-8">
+            <div className="text-destructive mb-2">Failed to load tasks</div>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Retry
+            </Button>
+          </div>
+        )}
+
         {/* Task Statistics */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="text-center p-4 rounded-lg bg-card/50 border border-border/50">
-            <div className="text-2xl font-bold text-foreground">{tasks.length}</div>
-            <div className="text-sm text-muted-foreground">Total Tasks</div>
+        {!isLoading && !error && (
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center p-4 rounded-lg bg-card/50 border border-border/50">
+              <div className="text-2xl font-bold text-foreground">{tasks.length}</div>
+              <div className="text-sm text-muted-foreground">Total Tasks</div>
+            </div>
+            <div className="text-center p-4 rounded-lg bg-card/50 border border-border/50">
+              <div className="text-2xl font-bold text-accent">{completedTasks.length}</div>
+              <div className="text-sm text-muted-foreground">Completed</div>
+            </div>
+            <div className="text-center p-4 rounded-lg bg-card/50 border border-border/50">
+              <div className="text-2xl font-bold text-primary">{pendingTasks.length}</div>
+              <div className="text-sm text-muted-foreground">Pending</div>
+            </div>
           </div>
-          <div className="text-center p-4 rounded-lg bg-card/50 border border-border/50">
-            <div className="text-2xl font-bold text-accent">{completedTasks.length}</div>
-            <div className="text-sm text-muted-foreground">Completed</div>
-          </div>
-          <div className="text-center p-4 rounded-lg bg-card/50 border border-border/50">
-            <div className="text-2xl font-bold text-primary">{pendingTasks.length}</div>
-            <div className="text-sm text-muted-foreground">Pending</div>
-          </div>
-        </div>
+        )}
 
         {/* Pending Tasks */}
         {pendingTasks.length > 0 && (
@@ -234,7 +221,7 @@ export function TaskBoard() {
             <div className="space-y-3">
               {pendingTasks.map((task) => (
                 <div
-                  key={task.id}
+                  key={task._id}
                   className="task-pending p-4 rounded-lg border transition-all duration-300 hover:border-primary/30 hover:shadow-lg animate-slide-up"
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -251,16 +238,13 @@ export function TaskBoard() {
                       )}
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span>
-                          Pomodoros: {task.pomodorosCompleted}/{task.pomodorosEstimated}
+                          Status: {task.status}
                         </span>
-                        <div className="flex-1 bg-border/30 rounded-full h-2">
-                          <div
-                            className="bg-primary h-2 rounded-full transition-all duration-300"
-                            style={{
-                              width: `${(task.pomodorosCompleted / task.pomodorosEstimated) * 100}%`
-                            }}
-                          />
-                        </div>
+                        {task.dueDate && (
+                          <span>
+                            Due: {new Date(task.dueDate).toLocaleDateString()}
+                          </span>
+                        )}
                       </div>
                     </div>
                     
@@ -268,7 +252,7 @@ export function TaskBoard() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleToggleComplete(task.id)}
+                        onClick={() => handleToggleComplete(task._id, task.status)}
                         className="btn-ghost text-accent hover:text-accent-foreground"
                       >
                         <Check className="w-4 h-4" />
@@ -276,7 +260,7 @@ export function TaskBoard() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleDeleteTask(task.id)}
+                        onClick={() => handleDeleteTask(task._id)}
                         className="btn-ghost text-destructive hover:text-destructive-foreground"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -296,7 +280,7 @@ export function TaskBoard() {
             <div className="space-y-3">
               {completedTasks.map((task) => (
                 <div
-                  key={task.id}
+                  key={task._id}
                   className="task-completed p-4 rounded-lg border transition-all duration-300 opacity-75 animate-slide-up"
                 >
                   <div className="flex items-start justify-between">
@@ -312,7 +296,7 @@ export function TaskBoard() {
                         <p className="text-sm text-muted-foreground mb-2 line-through">{task.description}</p>
                       )}
                       <div className="text-xs text-muted-foreground">
-                        Completed with {task.pomodorosCompleted} pomodoros
+                        Completed on {new Date(task.updatedAt).toLocaleDateString()}
                       </div>
                     </div>
                     
@@ -320,7 +304,7 @@ export function TaskBoard() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleToggleComplete(task.id)}
+                        onClick={() => handleToggleComplete(task._id, task.status)}
                         className="btn-ghost"
                       >
                         <Edit3 className="w-4 h-4" />
@@ -328,7 +312,7 @@ export function TaskBoard() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleDeleteTask(task.id)}
+                        onClick={() => handleDeleteTask(task._id)}
                         className="btn-ghost text-destructive hover:text-destructive-foreground"
                       >
                         <Trash2 className="w-4 h-4" />
