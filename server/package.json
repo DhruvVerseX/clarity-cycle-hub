@@ -8,9 +8,11 @@
     "start": "node dist/index.js",
     "dev": "tsx index.ts",
     "build": "tsc",
-    "watch": "tsx watch index.ts"
+    "watch": "tsx watch index.ts",
+    "test:email": "node test-email.js"
   },
   "dependencies": {
+    "@types/nodemailer": "^6.4.17",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
@@ -18,7 +20,8 @@
     "express-validator": "^7.2.1",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.18.0",
-    "mongoose": "^8.17.0"
+    "mongoose": "^8.17.0",
+    "nodemailer": "^7.0.5"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
