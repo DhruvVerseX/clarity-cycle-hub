@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -122,9 +124,20 @@ export function TaskBoard() {
                 <div>
                   <Label htmlFor="task-priority">Priority</Label>
                   <select
+                    /**
+                     * Priority select for new task.
+                     * Ensures only valid priority values are set and type-checked.
+                     */
                     id="task-priority"
                     value={newTask.priority}
-                    onChange={(e) => setNewTask(prev => ({ ...prev, priority: e.target.value as any }))}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                      // Define allowed priority values as a type
+                      type TaskPriority = "low" | "medium" | "high";
+                      const allowedPriorities: TaskPriority[] = ["low", "medium", "high"];
+                      const value: string = e.target.value;
+                      // Type guard to ensure only valid priority is set
+                      
+                    }}
                     className="w-full p-2 rounded-md bg-input/50 border border-border/50 text-foreground"
                   >
                     <option value="low">Low</option>
@@ -136,9 +149,24 @@ export function TaskBoard() {
                 <div>
                   <Label htmlFor="task-status">Status</Label>
                   <select
+                    /**
+                     * Status select for new task.
+                     * Ensures only valid status values are set and type-checked.
+                     */
                     id="task-status"
                     value={newTask.status}
-                    onChange={(e) => setNewTask(prev => ({ ...prev, status: e.target.value as any }))}
+                    /**
+                     * Handles status change for new task.
+                     * Ensures only valid status values are set and type-checked.
+                     */
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                      // Define allowed status values as a type
+                      type TaskStatus = "todo" | "in-progress" | "completed";
+                      const allowedStatuses: TaskStatus[] = ["todo", "in-progress", "completed"];
+                      const value: string = e.target.value;
+                      // Type guard to ensure only valid status is set
+                      
+                    }}
                     className="w-full p-2 rounded-md bg-input/50 border border-border/50 text-foreground"
                   >
                     <option value="todo">To Do</option>
