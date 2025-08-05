@@ -5,6 +5,14 @@ import { motion, AnimatePresence } from "motion/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/hooks/use-toast"
+import {
+  loginWithAuth0,
+  signupWithAuth0,
+  setAuthData,
+  type LoginCredentials,
+  type SignupCredentials,
+} from "@/services/auth0"
 import {
   Timer,
   BarChart3,
@@ -31,12 +39,13 @@ interface PomodoroLandingPageProps {
 }
 
 export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProps) {
+  const { toast } = useToast()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [currentTestimonial, setCurrentTestimonial] = useState(0)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showSignupModal, setShowSignupModal] = useState(false)
-  const [loginForm, setLoginForm] = useState({ email: "", password: "" })
-  const [signupForm, setSignupForm] = useState({ 
+  const [loginForm, setLoginForm] = useState<LoginCredentials>({ email: "", password: "" })
+  const [signupForm, setSignupForm] = useState<SignupCredentials>({ 
     name: "", 
     email: "", 
     password: "", 
@@ -50,17 +59,36 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
     setIsLoading(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await loginWithAuth0(loginForm)
       
-      // For demo purposes, accept any valid email/password
-      if (loginForm.email && loginForm.password) {
+      if (response.success && response.user && response.token) {
+        // Store auth data
+        setAuthData(response.token, response.user)
+        
+        // Show success message
+        toast({
+          title: "Success!",
+          description: "Welcome back! You've been successfully signed in.",
+        })
+        
+        // Call the onLogin callback
         onLogin?.()
         setShowLoginModal(false)
         setLoginForm({ email: "", password: "" })
+      } else {
+        toast({
+          title: "Login Failed",
+          description: response.message,
+          variant: "destructive",
+        })
       }
     } catch (error) {
       console.error("Login failed:", error)
+      toast({
+        title: "Login Failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -71,17 +99,36 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
     setIsLoading(true)
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await signupWithAuth0(signupForm)
       
-      // For demo purposes, accept any valid form
-      if (signupForm.name && signupForm.email && signupForm.password && signupForm.password === signupForm.confirmPassword) {
+      if (response.success && response.user && response.token) {
+        // Store auth data
+        setAuthData(response.token, response.user)
+        
+        // Show success message
+        toast({
+          title: "Welcome!",
+          description: "Your account has been created successfully!",
+        })
+        
+        // Call the onLogin callback
         onLogin?.()
         setShowSignupModal(false)
         setSignupForm({ name: "", email: "", password: "", confirmPassword: "" })
+      } else {
+        toast({
+          title: "Registration Failed",
+          description: response.message,
+          variant: "destructive",
+        })
       }
     } catch (error) {
       console.error("Signup failed:", error)
+      toast({
+        title: "Registration Failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }
