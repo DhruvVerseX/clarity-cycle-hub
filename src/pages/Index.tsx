@@ -10,7 +10,8 @@ const Index = () => {
   // Check authentication status on component mount
   useEffect(() => {
     const checkAuth = () => {
-      const authenticated = isAuthenticated();
+      // Corrected the isAuthenticated call to directly access the boolean value
+      const authenticated = isAuthenticated;
       const currentUser = getCurrentUser();
       
       setIsAuthenticated(authenticated);
@@ -19,9 +20,12 @@ const Index = () => {
 
     checkAuth();
   }, []);
-
+  /**
+   * Handles the login process by checking the authentication status and setting the user state.
+   */
   const handleLogin = () => {
-    const authenticated = isAuthenticated();
+    // Corrected the isAuthenticated call to directly access the boolean value
+    const authenticated = isAuthenticated;
     const currentUser = getCurrentUser();
     
     setIsAuthenticated(authenticated);
