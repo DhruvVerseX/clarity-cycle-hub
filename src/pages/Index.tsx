@@ -6,6 +6,7 @@ import { isAuthenticated, getCurrentUser, logoutFromAuth0 } from "@/services/aut
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
+<<<<<<< HEAD
 
   // Check authentication status on component mount
   useEffect(() => {
@@ -19,9 +20,32 @@ const Index = () => {
 
     checkAuth();
   }, []);
+=======
+>>>>>>> 66ade86a8c5bc3c7ba36f001ba3d4339bc6b5f02
 
+  // Check authentication status on component mount
+  useEffect(() => {
+    const checkAuth = () => {
+      // Corrected the isAuthenticated call to directly access the boolean value
+      const authenticated = isAuthenticated;
+      const currentUser = getCurrentUser();
+      
+      setIsAuthenticated(authenticated);
+      setUser(currentUser);
+    };
+
+    checkAuth();
+  }, []);
+  /**
+   * Handles the login process by checking the authentication status and setting the user state.
+   */
   const handleLogin = () => {
+<<<<<<< HEAD
     const authenticated = isAuthenticated();
+=======
+    // Corrected the isAuthenticated call to directly access the boolean value
+    const authenticated = isAuthenticated;
+>>>>>>> 66ade86a8c5bc3c7ba36f001ba3d4339bc6b5f02
     const currentUser = getCurrentUser();
     
     setIsAuthenticated(authenticated);

@@ -10,6 +10,10 @@ import { Task, PomodoroSession, User } from "./models/index.js";
 
 // Import routes
 import authRoutes from "./routes/auth.js";
+<<<<<<< HEAD
+=======
+import contactRoutes from "./routes/contact.js";
+>>>>>>> 66ade86a8c5bc3c7ba36f001ba3d4339bc6b5f02
 
 // Import middleware
 import { authenticateToken, AuthRequest } from "./middleware/auth.js";
@@ -52,6 +56,12 @@ const connectDB = async (): Promise<void> => {
 // Authentication routes
 app.use("/api/auth", authRoutes);
 
+<<<<<<< HEAD
+=======
+// Contact routes
+app.use("/api/contact", contactRoutes);
+
+>>>>>>> 66ade86a8c5bc3c7ba36f001ba3d4339bc6b5f02
 // Health check endpoint
 app.get("/api/health", (req: Request, res: Response) => {
   res.json({ 

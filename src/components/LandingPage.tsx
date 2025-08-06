@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
+<<<<<<< HEAD
 import {
   loginWithAuth0,
   signupWithAuth0,
@@ -13,6 +14,9 @@ import {
   type LoginCredentials,
   type SignupCredentials,
 } from "@/services/auth0"
+=======
+import { useAuth0 } from "@auth0/auth0-react"
+>>>>>>> 66ade86a8c5bc3c7ba36f001ba3d4339bc6b5f02
 import {
   Timer,
   BarChart3,
@@ -33,6 +37,7 @@ import {
   Menu,
   X,
 } from "lucide-react"
+import e from "cors"
 
 interface PomodoroLandingPageProps {
   onLogin?: () => void;
@@ -42,6 +47,7 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
   const { toast } = useToast()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [currentTestimonial, setCurrentTestimonial] = useState(0)
+<<<<<<< HEAD
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showSignupModal, setShowSignupModal] = useState(false)
   const [loginForm, setLoginForm] = useState<LoginCredentials>({ email: "", password: "" })
@@ -133,6 +139,9 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
       setIsLoading(false)
     }
   }
+=======
+  const { user, loginWithRedirect, logout } = useAuth0()
+>>>>>>> 66ade86a8c5bc3c7ba36f001ba3d4339bc6b5f02
 
   const features = [
     {
@@ -269,25 +278,16 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
             </a>
           </div>
 
-          <div className="hidden md:flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              className="text-gray-300 hover:text-white"
-              onClick={() => setShowLoginModal(true)}
-            >
-              Sign In
-            </Button>
-            <Button 
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              onClick={() => setShowSignupModal(true)}
-            >
-              Get Started Free
-            </Button>
-          </div>
 
           {/* Mobile Menu Button */}
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </Button>
+          <Button
+          onClick={(e) => loginWithRedirect()}
+          className="hidden md:inline-flex items-center bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            login with Auth0
           </Button>
         </nav>
 
@@ -313,21 +313,6 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
                 <a href="#pricing" className="block text-gray-300 hover:text-white transition-colors">
                   Pricing
                 </a>
-                <div className="pt-4 border-t border-gray-700 space-y-2">
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start"
-                    onClick={() => setShowLoginModal(true)}
-                  >
-                    Sign In
-                  </Button>
-                  <Button 
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600"
-                    onClick={() => setShowSignupModal(true)}
-                  >
-                    Get Started Free
-                  </Button>
-                </div>
               </div>
             </motion.div>
           )}
@@ -363,7 +348,6 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg"
-                  onClick={() => setShowSignupModal(true)}
                 >
                   Start Free Trial
                   <ArrowRight className="ml-2 w-5 h-5" />
@@ -724,7 +708,6 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg"
-                onClick={() => setShowSignupModal(true)}
               >
                 Start Your Free Trial
                 <ArrowRight className="ml-2 w-5 h-5" />
@@ -869,170 +852,7 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
         </div>
       </footer>
 
-      {/* Authentication Modals */}
-      <AnimatePresence>
-        {showLoginModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowLoginModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gray-800 rounded-2xl p-8 w-full max-w-md border border-gray-700"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold mb-2">Welcome Back</h2>
-                <p className="text-gray-400">Sign in to continue your productivity journey</p>
-              </div>
-              
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Email</label>
-                  <input
-                    type="email"
-                    value={loginForm.email}
-                    onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Enter your email"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Password</label>
-                  <input
-                    type="password"
-                    value={loginForm.password}
-                    onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Enter your password"
-                    required
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Signing In..." : "Sign In"}
-                </Button>
-              </form>
-              
-              <div className="mt-6 text-center">
-                <p className="text-gray-400">
-                  Don't have an account?{" "}
-                  <button
-                    onClick={() => {
-                      setShowLoginModal(false)
-                      setShowSignupModal(true)
-                    }}
-                    className="text-purple-400 hover:text-purple-300 font-medium"
-                  >
-                    Sign up
-                  </button>
-                </p>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        {showSignupModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setShowSignupModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-gray-800 rounded-2xl p-8 w-full max-w-md border border-gray-700"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold mb-2">Join FocusFlow</h2>
-                <p className="text-gray-400">Start your productivity transformation today</p>
-              </div>
-              
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Full Name</label>
-                  <input
-                    type="text"
-                    value={signupForm.name}
-                    onChange={(e) => setSignupForm({ ...signupForm, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Enter your full name"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Email</label>
-                  <input
-                    type="email"
-                    value={signupForm.email}
-                    onChange={(e) => setSignupForm({ ...signupForm, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Enter your email"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Password</label>
-                  <input
-                    type="password"
-                    value={signupForm.password}
-                    onChange={(e) => setSignupForm({ ...signupForm, password: e.target.value })}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Create a password"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Confirm Password</label>
-                  <input
-                    type="password"
-                    value={signupForm.confirmPassword}
-                    onChange={(e) => setSignupForm({ ...signupForm, confirmPassword: e.target.value })}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    placeholder="Confirm your password"
-                    required
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Creating Account..." : "Create Account"}
-                </Button>
-              </form>
-              
-              <div className="mt-6 text-center">
-                <p className="text-gray-400">
-                  Already have an account?{" "}
-                  <button
-                    onClick={() => {
-                      setShowSignupModal(false)
-                      setShowLoginModal(true)
-                    }}
-                    className="text-purple-400 hover:text-purple-300 font-medium"
-                  >
-                    Sign in
-                  </button>
-                </p>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* All authentication modals and handlers removed */}
 
       {/* Scroll to Top Button */}
       <motion.button
