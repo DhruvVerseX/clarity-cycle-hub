@@ -15,6 +15,10 @@ import contactRoutes from "./routes/contact.js";
 // Import middleware
 import { authenticateToken, AuthRequest } from "./middleware/auth.js";
 
+// Import configuration
+import { authConfig } from "./config/auth.js";
+import { validateAndExit, getConfigurationSummary } from "./config/validate.js";
+
 // Load environment variables
 dotenv.config();
 
@@ -58,6 +62,17 @@ app.get("/api/health", (req: Request, res: Response) => {
     status: "OK", 
     message: "Server is running",
     timestamp: new Date().toISOString()
+  });
+});
+
+// Configuration info endpoint
+app.get("/api/config", (req: Request, res: Response) => {
+  res.json({
+    auth: getConfigurationSummary(),
+    server: {
+      version: authConfig.api.version,
+      environment: process.env.NODE_ENV || 'development'
+    }
   });
 });
 
@@ -215,10 +230,14 @@ app.use("*", (req: Request, res: Response) => {
 // Start server
 const startServer = async (): Promise<void> => {
   try {
+    // Validate configuration before starting
+    await validateAndExit();
+    
     await connectDB();
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+      console.log(`⚙️  Config info: http://localhost:${PORT}/api/config`);
       console.log(`🌐 Frontend: ${process.env["CORS_ORIGIN"] || "http://localhost:5173"}`);
     });
   } catch (error) {

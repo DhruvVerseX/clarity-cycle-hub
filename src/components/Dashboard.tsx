@@ -7,9 +7,14 @@ import { Calendar, BarChart3, Settings, LogOut, User, Clock, Target, TrendingUp 
 
 interface DashboardProps {
   onLogout: () => void;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
 }
 
-export function Dashboard({ onLogout }: DashboardProps) {
+export function Dashboard({ onLogout, user }: DashboardProps) {
   const [activeTab, setActiveTab] = useState<'timer' | 'tasks' | 'analytics' | 'calendar'>('timer');
 
   const stats = {
@@ -37,7 +42,9 @@ export function Dashboard({ onLogout }: DashboardProps) {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">FocusFlow</h1>
-                <p className="text-sm text-muted-foreground">Welcome back, User!</p>
+                <p className="text-sm text-muted-foreground">
+                  Welcome back, {user?.name || "User"}!
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
