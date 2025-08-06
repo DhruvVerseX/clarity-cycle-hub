@@ -10,6 +10,7 @@ import { Task, PomodoroSession, User } from "./models/index.js";
 
 // Import routes
 import authRoutes from "./routes/auth.js";
+import contactRoutes from "./routes/contact.js";
 
 // Import middleware
 import { authenticateToken, AuthRequest } from "./middleware/auth.js";
@@ -51,6 +52,9 @@ const connectDB = async (): Promise<void> => {
 
 // Authentication routes
 app.use("/api/auth", authRoutes);
+
+// Contact routes
+app.use("/api/contact", contactRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req: Request, res: Response) => {
