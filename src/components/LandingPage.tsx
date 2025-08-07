@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "motion/react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/hooks/use-toast"
-import { useAuth0 } from "@auth0/auth0-react"
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth0 } from "@auth0/auth0-react";
 import {
   Timer,
   BarChart3,
@@ -26,87 +26,100 @@ import {
   ChevronDown,
   Menu,
   X,
-} from "lucide-react"
-import e from "cors"
+} from "lucide-react";
+import e from "cors";
 
 interface PomodoroLandingPageProps {
   onLogin?: () => void;
 }
 
-export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProps) {
-  const { toast } = useToast()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [currentTestimonial, setCurrentTestimonial] = useState(0)
-  const { user, loginWithRedirect, logout } = useAuth0()
+export default function PomodoroLandingPage({
+  onLogin,
+}: PomodoroLandingPageProps) {
+  const { user, isAuthenticated, isLoading, loginWithRedirect, logout } = useAuth0();
+  const { toast } = useToast();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   const features = [
     {
       icon: Timer,
       title: "Smart Pomodoro Timer",
-      description: "Customizable focus sessions with beautiful animations and intelligent break reminders",
+      description:
+        "Customizable focus sessions with beautiful animations and intelligent break reminders",
       color: "from-purple-500 to-pink-500",
     },
     {
       icon: CheckCircle,
       title: "Task Management",
-      description: "Organize your work with an intuitive task board and real-time progress tracking",
+      description:
+        "Organize your work with an intuitive task board and real-time progress tracking",
       color: "from-blue-500 to-cyan-500",
     },
     {
       icon: Calendar,
       title: "Session Tracking",
-      description: "Visual calendar integration showing your productivity patterns and daily streaks",
+      description:
+        "Visual calendar integration showing your productivity patterns and daily streaks",
       color: "from-green-500 to-emerald-500",
     },
     {
       icon: BarChart3,
       title: "Analytics & Insights",
-      description: "Detailed performance analysis with personalized improvement suggestions",
+      description:
+        "Detailed performance analysis with personalized improvement suggestions",
       color: "from-orange-500 to-red-500",
     },
     {
       icon: Brain,
       title: "Focus Enhancement",
-      description: "Science-backed techniques to improve concentration and reduce distractions",
+      description:
+        "Science-backed techniques to improve concentration and reduce distractions",
       color: "from-indigo-500 to-purple-500",
     },
     {
       icon: Zap,
       title: "Productivity Boost",
-      description: "Increase your output by up to 40% with structured work sessions",
+      description:
+        "Increase your output by up to 40% with structured work sessions",
       color: "from-yellow-500 to-orange-500",
     },
-  ]
+  ];
 
   const benefits = [
     {
       icon: Target,
       title: "Laser Focus",
-      description: "Eliminate distractions and maintain deep concentration for extended periods",
+      description:
+        "Eliminate distractions and maintain deep concentration for extended periods",
     },
     {
       icon: TrendingUp,
       title: "Measurable Progress",
-      description: "Track your productivity gains with detailed analytics and performance metrics",
+      description:
+        "Track your productivity gains with detailed analytics and performance metrics",
     },
     {
       icon: Shield,
       title: "Burnout Prevention",
-      description: "Built-in break reminders and workload management to maintain healthy work habits",
+      description:
+        "Built-in break reminders and workload management to maintain healthy work habits",
     },
     {
       icon: Award,
       title: "Goal Achievement",
-      description: "Reach your objectives faster with structured time management and task prioritization",
+      description:
+        "Reach your objectives faster with structured time management and task prioritization",
     },
-  ]
+  ];
 
   const testimonials = [
     {
       name: "Sarah Chen",
       role: "Software Developer",
       company: "TechCorp",
-      content: "FocusFlow transformed my productivity. I'm completing 40% more tasks and feeling less stressed.",
+      content:
+        "FocusFlow transformed my productivity. I'm completing 40% more tasks and feeling less stressed.",
       rating: 5,
       avatar: "/placeholder.svg?height=60&width=60&text=SC",
     },
@@ -114,7 +127,8 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
       name: "Marcus Johnson",
       role: "Designer",
       company: "Creative Studio",
-      content: "The analytics feature helped me identify my peak productivity hours. Game-changer!",
+      content:
+        "The analytics feature helped me identify my peak productivity hours. Game-changer!",
       rating: 5,
       avatar: "/placeholder.svg?height=60&width=60&text=MJ",
     },
@@ -122,25 +136,21 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
       name: "Emily Rodriguez",
       role: "Student",
       company: "University",
-      content: "Perfect for studying! The break reminders keep me fresh and focused throughout long sessions.",
+      content:
+        "Perfect for studying! The break reminders keep me fresh and focused throughout long sessions.",
       rating: 5,
       avatar: "/placeholder.svg?height=60&width=60&text=ER",
     },
-  ]
+  ];
 
   const stats = [
     { number: "50K+", label: "Active Users" },
     { number: "2M+", label: "Focus Sessions" },
     { number: "40%", label: "Productivity Increase" },
     { number: "4.9", label: "App Store Rating" },
-  ]
+  ];
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length)
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [testimonials.length])
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
@@ -160,31 +170,65 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-gray-300 hover:text-white transition-colors">
+            <a
+              href="#features"
+              className="text-gray-300 hover:text-white transition-colors"
+            >
               Features
             </a>
-            <a href="#benefits" className="text-gray-300 hover:text-white transition-colors">
+            <a
+              href="#benefits"
+              className="text-gray-300 hover:text-white transition-colors"
+            >
               Benefits
             </a>
-            <a href="#testimonials" className="text-gray-300 hover:text-white transition-colors">
+            <a
+              href="#testimonials"
+              className="text-gray-300 hover:text-white transition-colors"
+            >
               Reviews
             </a>
-            <a href="#pricing" className="text-gray-300 hover:text-white transition-colors">
+            <a
+              href="#pricing"
+              className="text-gray-300 hover:text-white transition-colors"
+            >
               Pricing
             </a>
           </div>
 
-
           {/* Mobile Menu Button */}
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </Button>
           <Button
-          onClick={(e) => loginWithRedirect()}
-          className="hidden md:inline-flex items-center bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2 rounded-lg transition-colors"
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            login with Auth0
+            {isMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </Button>
+
+          {isAuthenticated ? (
+            <button onClick={(e) => logout()}>
+            Log Out
+          </button>
+          ) : (
+            <button onClick={(e) => loginWithRedirect()}>
+              Log In
+          </button>
+
+          )}
+          {
+            isAuthenticated && (
+              <div>
+                <img src={user.picture} alt={user.name} />
+                <h2>{user.name}</h2>
+                <p>{user.email}</p>
+              </div>
+            )
+          }
         </nav>
 
         {/* Mobile Menu */}
@@ -197,16 +241,28 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
               className="md:hidden mt-4 bg-gray-800/95 backdrop-blur-sm rounded-lg border border-gray-700"
             >
               <div className="p-4 space-y-4">
-                <a href="#features" className="block text-gray-300 hover:text-white transition-colors">
+                <a
+                  href="#features"
+                  className="block text-gray-300 hover:text-white transition-colors"
+                >
                   Features
                 </a>
-                <a href="#benefits" className="block text-gray-300 hover:text-white transition-colors">
+                <a
+                  href="#benefits"
+                  className="block text-gray-300 hover:text-white transition-colors"
+                >
                   Benefits
                 </a>
-                <a href="#testimonials" className="block text-gray-300 hover:text-white transition-colors">
+                <a
+                  href="#testimonials"
+                  className="block text-gray-300 hover:text-white transition-colors"
+                >
                   Reviews
                 </a>
-                <a href="#pricing" className="block text-gray-300 hover:text-white transition-colors">
+                <a
+                  href="#pricing"
+                  className="block text-gray-300 hover:text-white transition-colors"
+                >
                   Pricing
                 </a>
               </div>
@@ -219,7 +275,11 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
       <section className="relative px-6 py-20 lg:py-32">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
               <Badge className="mb-6 bg-purple-500/20 text-purple-300 border-purple-500/30">
                 <Zap className="w-4 h-4 mr-2" />
                 #1 Productivity App
@@ -236,8 +296,9 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
               </h1>
 
               <p className="text-xl lg:text-2xl text-gray-300 mb-8 leading-relaxed">
-                Transform your productivity with the ultimate Pomodoro companion. Built for deep work, designed for
-                success, powered by intelligent insights.
+                Transform your productivity with the ultimate Pomodoro
+                companion. Built for deep work, designed for success, powered by
+                intelligent insights.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
@@ -285,7 +346,10 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
                 <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl p-8 border border-gray-700 shadow-2xl">
                   <div className="text-center mb-6">
                     <div className="w-32 h-32 mx-auto mb-4 relative">
-                      <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                      <svg
+                        className="w-full h-full transform -rotate-90"
+                        viewBox="0 0 100 100"
+                      >
                         <circle
                           cx="50"
                           cy="50"
@@ -307,13 +371,23 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
                           strokeDasharray={`${2 * Math.PI * 45}`}
                           strokeDashoffset={`${2 * Math.PI * 45 * 0.3}`}
                           animate={{
-                            strokeDashoffset: [2 * Math.PI * 45 * 0.3, 2 * Math.PI * 45 * 0.7, 2 * Math.PI * 45 * 0.3],
+                            strokeDashoffset: [
+                              2 * Math.PI * 45 * 0.3,
+                              2 * Math.PI * 45 * 0.7,
+                              2 * Math.PI * 45 * 0.3,
+                            ],
                           }}
-                          transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+                          transition={{
+                            duration: 3,
+                            repeat: Number.POSITIVE_INFINITY,
+                            ease: "easeInOut",
+                          }}
                         />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <div className="text-2xl font-mono font-bold">24:15</div>
+                        <div className="text-2xl font-mono font-bold">
+                          24:15
+                        </div>
                         <div className="text-xs text-gray-400">Focus Time</div>
                       </div>
                     </div>
@@ -326,11 +400,15 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
                     </div>
                     <div className="flex items-center space-x-3 p-3 bg-gray-700/30 rounded-lg">
                       <div className="w-4 h-4 border-2 border-gray-500 rounded-full"></div>
-                      <span className="text-sm text-gray-400">Review design mockups</span>
+                      <span className="text-sm text-gray-400">
+                        Review design mockups
+                      </span>
                     </div>
                     <div className="flex items-center space-x-3 p-3 bg-gray-700/30 rounded-lg">
                       <div className="w-4 h-4 border-2 border-gray-500 rounded-full"></div>
-                      <span className="text-sm text-gray-400">Prepare presentation</span>
+                      <span className="text-sm text-gray-400">
+                        Prepare presentation
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -338,7 +416,11 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
                 {/* Floating Elements */}
                 <motion.div
                   animate={{ y: [-10, 10, -10] }}
-                  transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+                  transition={{
+                    duration: 3,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: "easeInOut",
+                  }}
                   className="absolute -top-4 -right-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full p-3"
                 >
                   <CheckCircle className="w-6 h-6" />
@@ -346,7 +428,12 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
 
                 <motion.div
                   animate={{ y: [10, -10, 10] }}
-                  transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut", delay: 1 }}
+                  transition={{
+                    duration: 3,
+                    repeat: Number.POSITIVE_INFINITY,
+                    ease: "easeInOut",
+                    delay: 1,
+                  }}
                   className="absolute -bottom-4 -left-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full p-3"
                 >
                   <BarChart3 className="w-6 h-6" />
@@ -388,7 +475,11 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
       {/* Features Section */}
       <section id="features" className="py-20">
         <div className="max-w-7xl mx-auto px-6">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} className="text-center mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="text-center mb-16"
+          >
             <Badge className="mb-4 bg-blue-500/20 text-blue-300 border-blue-500/30">
               <Star className="w-4 h-4 mr-2" />
               Powerful Features
@@ -401,7 +492,8 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
               </span>
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Discover the comprehensive suite of tools designed to transform your work habits and boost your focus.
+              Discover the comprehensive suite of tools designed to transform
+              your work habits and boost your focus.
             </p>
           </motion.div>
 
@@ -422,8 +514,12 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
                     >
                       <feature.icon className="w-6 h-6" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                    <p className="text-gray-400 leading-relaxed">{feature.description}</p>
+                    <h3 className="text-xl font-semibold mb-3">
+                      {feature.title}
+                    </h3>
+                    <p className="text-gray-400 leading-relaxed">
+                      {feature.description}
+                    </p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -433,10 +529,16 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
       </section>
 
       {/* Benefits Section */}
-      <section id="benefits" className="py-20 bg-gradient-to-r from-gray-900/50 to-gray-800/50">
+      <section
+        id="benefits"
+        className="py-20 bg-gradient-to-r from-gray-900/50 to-gray-800/50"
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }}>
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+            >
               <Badge className="mb-4 bg-green-500/20 text-green-300 border-green-500/30">
                 <TrendingUp className="w-4 h-4 mr-2" />
                 Proven Results
@@ -449,8 +551,9 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
                 </span>
               </h2>
               <p className="text-xl text-gray-300 mb-8">
-                Join thousands of professionals who have transformed their productivity and achieved their goals with
-                our scientifically-backed approach.
+                Join thousands of professionals who have transformed their
+                productivity and achieved their goals with our
+                scientifically-backed approach.
               </p>
 
               <div className="space-y-6">
@@ -466,7 +569,9 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
                       <benefit.icon className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold mb-2">{benefit.title}</h3>
+                      <h3 className="text-lg font-semibold mb-2">
+                        {benefit.title}
+                      </h3>
                       <p className="text-gray-400">{benefit.description}</p>
                     </div>
                   </motion.div>
@@ -474,15 +579,23 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
               </div>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} className="relative">
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              className="relative"
+            >
               <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 border border-gray-700">
                 <div className="grid grid-cols-2 gap-6 mb-6">
                   <div className="text-center p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
-                    <div className="text-2xl font-bold text-purple-400 mb-1">25min</div>
+                    <div className="text-2xl font-bold text-purple-400 mb-1">
+                      25min
+                    </div>
                     <div className="text-sm text-gray-400">Focus Sessions</div>
                   </div>
                   <div className="text-center p-4 bg-green-500/10 rounded-lg border border-green-500/20">
-                    <div className="text-2xl font-bold text-green-400 mb-1">5min</div>
+                    <div className="text-2xl font-bold text-green-400 mb-1">
+                      5min
+                    </div>
                     <div className="text-sm text-gray-400">Break Time</div>
                   </div>
                 </div>
@@ -490,15 +603,21 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
                     <span className="text-sm">Today's Progress</span>
-                    <Badge className="bg-green-500/20 text-green-300">8/10 sessions</Badge>
+                    <Badge className="bg-green-500/20 text-green-300">
+                      8/10 sessions
+                    </Badge>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
                     <span className="text-sm">Weekly Goal</span>
-                    <Badge className="bg-blue-500/20 text-blue-300">42/50 sessions</Badge>
+                    <Badge className="bg-blue-500/20 text-blue-300">
+                      42/50 sessions
+                    </Badge>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
                     <span className="text-sm">Productivity Score</span>
-                    <Badge className="bg-purple-500/20 text-purple-300">94%</Badge>
+                    <Badge className="bg-purple-500/20 text-purple-300">
+                      94%
+                    </Badge>
                   </div>
                 </div>
               </div>
@@ -506,7 +625,11 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
               {/* Floating Achievement */}
               <motion.div
                 animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+                transition={{
+                  duration: 4,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "easeInOut",
+                }}
                 className="absolute -top-6 -right-6 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full p-4"
               >
                 <Award className="w-8 h-8" />
@@ -519,7 +642,11 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
       {/* Testimonials Section */}
       <section id="testimonials" className="py-20">
         <div className="max-w-7xl mx-auto px-6">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} className="text-center mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="text-center mb-16"
+          >
             <Badge className="mb-4 bg-yellow-500/20 text-yellow-300 border-yellow-500/30">
               <Users className="w-4 h-4 mr-2" />
               Loved by Users
@@ -545,23 +672,34 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
                 <Card className="bg-gray-800/50 border-gray-700">
                   <CardContent className="p-8 text-center">
                     <div className="flex justify-center mb-4">
-                      {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                      ))}
+                      {[...Array(testimonials[currentTestimonial].rating)].map(
+                        (_, i) => (
+                          <Star
+                            key={i}
+                            className="w-5 h-5 text-yellow-400 fill-current"
+                          />
+                        )
+                      )}
                     </div>
                     <blockquote className="text-xl lg:text-2xl text-gray-300 mb-6 leading-relaxed">
                       "{testimonials[currentTestimonial].content}"
                     </blockquote>
                     <div className="flex items-center justify-center space-x-4">
                       <img
-                        src={testimonials[currentTestimonial].avatar || "/placeholder.svg"}
+                        src={
+                          testimonials[currentTestimonial].avatar ||
+                          "/placeholder.svg"
+                        }
                         alt={testimonials[currentTestimonial].name}
                         className="w-12 h-12 rounded-full"
                       />
                       <div className="text-left">
-                        <div className="font-semibold">{testimonials[currentTestimonial].name}</div>
+                        <div className="font-semibold">
+                          {testimonials[currentTestimonial].name}
+                        </div>
                         <div className="text-sm text-gray-400">
-                          {testimonials[currentTestimonial].role} at {testimonials[currentTestimonial].company}
+                          {testimonials[currentTestimonial].role} at{" "}
+                          {testimonials[currentTestimonial].company}
                         </div>
                       </div>
                     </div>
@@ -576,7 +714,9 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
                   key={index}
                   onClick={() => setCurrentTestimonial(index)}
                   className={`w-3 h-3 rounded-full transition-colors ${
-                    index === currentTestimonial ? "bg-purple-500" : "bg-gray-600"
+                    index === currentTestimonial
+                      ? "bg-purple-500"
+                      : "bg-gray-600"
                   }`}
                 />
               ))}
@@ -586,9 +726,15 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
       </section>
 
       {/* CTA Section */}
-      <section id="pricing" className="py-20 bg-gradient-to-r from-purple-900/20 to-pink-900/20">
+      <section
+        id="pricing"
+        className="py-20 bg-gradient-to-r from-purple-900/20 to-pink-900/20"
+      >
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+          >
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">
               Ready to Transform
               <br />
@@ -597,7 +743,8 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
               </span>
             </h2>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Join over 50,000 professionals who have already revolutionized their work habits with FocusFlow.
+              Join over 50,000 professionals who have already revolutionized
+              their work habits with FocusFlow.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
@@ -648,7 +795,8 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
                 <span className="text-xl font-bold">FocusFlow</span>
               </div>
               <p className="text-gray-400 text-sm">
-                The ultimate productivity companion for professionals who demand excellence.
+                The ultimate productivity companion for professionals who demand
+                excellence.
               </p>
             </div>
 
@@ -732,15 +880,26 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
           </div>
 
           <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">© 2024 FocusFlow. All rights reserved.</p>
+            <p className="text-gray-400 text-sm">
+              © 2024 FocusFlow. All rights reserved.
+            </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+              <a
+                href="#"
+                className="text-gray-400 hover:text-white transition-colors text-sm"
+              >
                 Privacy Policy
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+              <a
+                href="#"
+                className="text-gray-400 hover:text-white transition-colors text-sm"
+              >
                 Terms of Service
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">
+              <a
+                href="#"
+                className="text-gray-400 hover:text-white transition-colors text-sm"
+              >
                 Cookie Policy
               </a>
             </div>
@@ -760,5 +919,5 @@ export default function PomodoroLandingPage({ onLogin }: PomodoroLandingPageProp
         <ChevronDown className="w-5 h-5 rotate-180" />
       </motion.button>
     </div>
-  )
+  );
 }
