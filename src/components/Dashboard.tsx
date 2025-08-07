@@ -1,21 +1,16 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PomodoroTimer } from "./PomodoroTimer";
+import  PomodoroTimer  from "./PomodoroTimer";
 import { TaskBoard } from "./TaskBoard";
 import { Calendar, BarChart3, Settings, LogOut, User, Clock, Target, TrendingUp } from "lucide-react";
+import { useAuth0 } from "@auth0/auth0-react";
+import TrackRecord from "./TrackRecord"
 
-interface DashboardProps {
-  onLogout: () => void;
-  user?: {
-    id: string;
-    name: string;
-    email: string;
-  } | null;
-}
 
-export function Dashboard({ onLogout, user }: DashboardProps) {
-  const [activeTab, setActiveTab] = useState<'timer' | 'tasks' | 'analytics' | 'calendar'>('timer');
+
+export function Dashboard() {
+  const [activeTab, setActiveTab] = useState<'timer' | 'tasks' | 'analytics' | 'calendar'| 'trackrecord'>('timer');
 
   const stats = {
     todayPomodoros: 5,
@@ -24,10 +19,13 @@ export function Dashboard({ onLogout, user }: DashboardProps) {
     focusStreak: 7
   };
 
+  const {user, logout } = useAuth0();
+
   const navItems = [
     { id: 'timer' as const, label: 'Timer', icon: Clock },
     { id: 'tasks' as const, label: 'Tasks', icon: Target },
     { id: 'analytics' as const, label: 'Analytics', icon: BarChart3 },
+    { id: 'trackrecord' as const, icon: TrendingUp, label: "Track Record",},
     { id: 'calendar' as const, label: 'Calendar', icon: Calendar },
   ];
 
@@ -55,7 +53,7 @@ export function Dashboard({ onLogout, user }: DashboardProps) {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={onLogout}
+                onClick={() => logout()}
                 className="btn-ghost text-destructive hover:text-destructive-foreground"
               >
                 <LogOut className="w-4 h-4 mr-2" />
@@ -145,6 +143,11 @@ export function Dashboard({ onLogout, user }: DashboardProps) {
               </div>
             )}
             
+            {activeTab === 'trackrecord' && (
+              <div className="animate-scale-in">
+                <TrackRecord />
+              </div>  )}
+
             {activeTab === 'analytics' && (
               <Card className="glass-card animate-scale-in">
                 <CardHeader>

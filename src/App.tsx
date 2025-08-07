@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { Auth0Provider } from "@auth0/auth0-react";
+import { TaskBoard } from "./components/TaskBoard";
+import { Dashboard } from "./components/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -16,6 +18,9 @@ const App = () => (
     authorizationParams={{
       redirect_uri: window.location.origin,
     }}
+    onRedirectCallback={(appState) => {
+      window.history.replaceState({}, document.title, appState?.returnTo || "/DashBoard");
+    }}
   >
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -25,6 +30,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/DashBoard" element={<Dashboard />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

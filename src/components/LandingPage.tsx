@@ -28,6 +28,7 @@ import {
   X,
 } from "lucide-react";
 import e from "cors";
+import { Navigate } from "react-router-dom";
 
 interface PomodoroLandingPageProps {
   onLogin?: () => void;
@@ -36,7 +37,8 @@ interface PomodoroLandingPageProps {
 export default function PomodoroLandingPage({
   onLogin,
 }: PomodoroLandingPageProps) {
-  const { user, isAuthenticated, isLoading, loginWithRedirect, logout } = useAuth0();
+  const { user, isAuthenticated, isLoading, loginWithRedirect, logout } =
+    useAuth0();
   const { toast } = useToast();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
@@ -150,8 +152,6 @@ export default function PomodoroLandingPage({
     { number: "4.9", label: "App Store Rating" },
   ];
 
-  
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-hidden">
       {/* Header */}
@@ -210,25 +210,20 @@ export default function PomodoroLandingPage({
             )}
           </Button>
 
-          {isAuthenticated ? (
-            <button onClick={(e) => logout()}>
-            Log Out
-          </button>
-          ) : (
-            <button onClick={(e) => loginWithRedirect()}>
+          {!isAuthenticated ? (
+            <button
+            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 rounded-lg transition-colors"
+              onClick={() =>
+                loginWithRedirect({
+                  appState: { returnTo: "/DashBoard" },
+                })
+              }
+            >
               Log In
-          </button>
-
-          )}
-          {
-            isAuthenticated && (
-              <div>
-                <img src={user.picture} alt={user.name} />
-                <h2>{user.name}</h2>
-                <p>{user.email}</p>
-              </div>
-            )
-          }
+            </button>
+          ) : (
+            <Navigate to="/DashBoard" />
+          )}     
         </nav>
 
         {/* Mobile Menu */}
