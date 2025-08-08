@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Progress } from "./ui/progress"
 import { Calendar, Clock, Target, TrendingUp, TrendingDown, Award, Flame, CheckCircle, Timer, BarChart3, ChevronLeft, ChevronRight, Activity } from 'lucide-react'
+import { useTasks, usePomodoroSessions } from "@/hooks/use-api"
 
 // Types for track record data
 interface DayRecord {
@@ -30,103 +31,79 @@ interface WeeklyStats {
   improvement: number // percentage change from last week
 }
 
-// Mock data - this will be replaced with API calls
-const mockWeeklyData: DayRecord[] = [
-  {
-    date: "2024-01-15",
-    dayName: "Mon",
-    focusSessions: 8,
-    totalFocusTime: 200,
-    tasksCompleted: 6,
-    totalTasks: 8,
-    breaksTaken: 8,
-    productivity: 85,
-    streak: true,
-  },
-  {
-    date: "2024-01-16",
-    dayName: "Tue",
-    focusSessions: 6,
-    totalFocusTime: 150,
-    tasksCompleted: 4,
-    totalTasks: 6,
-    breaksTaken: 6,
-    productivity: 78,
-    streak: true,
-  },
-  {
-    date: "2024-01-17",
-    dayName: "Wed",
-    focusSessions: 10,
-    totalFocusTime: 250,
-    tasksCompleted: 8,
-    totalTasks: 9,
-    breaksTaken: 10,
-    productivity: 92,
-    streak: true,
-  },
-  {
-    date: "2024-01-18",
-    dayName: "Thu",
-    focusSessions: 4,
-    totalFocusTime: 100,
-    tasksCompleted: 3,
-    totalTasks: 5,
-    breaksTaken: 4,
-    productivity: 65,
-    streak: false,
-  },
-  {
-    date: "2024-01-19",
-    dayName: "Fri",
-    focusSessions: 7,
-    totalFocusTime: 175,
-    tasksCompleted: 5,
-    totalTasks: 7,
-    breaksTaken: 7,
-    productivity: 82,
-    streak: true,
-  },
-  {
-    date: "2024-01-20",
-    dayName: "Sat",
-    focusSessions: 5,
-    totalFocusTime: 125,
-    tasksCompleted: 3,
-    totalTasks: 4,
-    breaksTaken: 5,
-    productivity: 88,
-    streak: true,
-  },
-  {
-    date: "2024-01-21",
-    dayName: "Sun",
-    focusSessions: 3,
-    totalFocusTime: 75,
-    tasksCompleted: 2,
-    totalTasks: 3,
-    breaksTaken: 3,
-    productivity: 75,
-    streak: true,
-  },
-]
+/**
+ * Returns a new Date set to 00:00:00.000 for the given date (local time).
+ */
+const startOfDay = (date: Date): Date => {
+  const d = new Date(date)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
 
-const mockWeeklyStats: WeeklyStats = {
-  totalSessions: 43,
-  totalFocusTime: 1075, // 17.9 hours
-  totalTasks: 42,
-  completedTasks: 31,
-  averageProductivity: 81,
-  currentStreak: 6,
-  bestDay: "Wednesday",
-  improvement: 15, // 15% improvement from last week
+/**
+ * Returns a new Date set to 23:59:59.999 for the given date (local time).
+ */
+const endOfDay = (date: Date): Date => {
+  const d = new Date(date)
+  d.setHours(23, 59, 59, 999)
+  return d
+}
+
+/**
+ * Get start and end of the week for a given offset.
+ * Week starts on Sunday to match existing UI (0 = Sunday, 6 = Saturday).
+ */
+const getWeekWindow = (weekOffset: number): { start: Date; end: Date } => {
+  const base = new Date()
+  // Shift by full weeks based on offset
+  base.setDate(base.getDate() + weekOffset * 7)
+  const start = new Date(base)
+  start.setDate(base.getDate() - base.getDay())
+  start.setHours(0, 0, 0, 0)
+  const end = new Date(start)
+  end.setDate(start.getDate() + 6)
+  end.setHours(23, 59, 59, 999)
+  return { start, end }
+}
+
+/**
+ * Get an array of seven dates representing each day in the given week window.
+ */
+const getWeekDays = (start: Date): Date[] => {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(start)
+    d.setDate(start.getDate() + i)
+    d.setHours(0, 0, 0, 0)
+    return d
+  })
 }
 
 export default function TrackRecord() {
-  const [weeklyData, setWeeklyData] = useState<DayRecord[]>(mockWeeklyData)
-  const [weeklyStats, setWeeklyStats] = useState<WeeklyStats>(mockWeeklyStats)
+  // Load tasks and sessions (sessions optional). Errors are handled gracefully.
+  const { tasks, isLoading: isLoadingTasks, error: tasksError } = useTasks()
+  const { sessions, isLoading: isLoadingSessions } = usePomodoroSessions()
+
+  const [weeklyData, setWeeklyData] = useState<DayRecord[]>([])
+  const [weeklyStats, setWeeklyStats] = useState<WeeklyStats>({
+    totalSessions: 0,
+    totalFocusTime: 0,
+    totalTasks: 0,
+    completedTasks: 0,
+    averageProductivity: 0,
+    currentStreak: 0,
+    bestDay: "-",
+    improvement: 0,
+  })
   const [currentWeek, setCurrentWeek] = useState(0) // 0 = current week, -1 = last week, etc.
   const [loading, setLoading] = useState(false)
+
+  /**
+   * Compute week window and days when week changes.
+   */
+  const { weekStart, weekEnd, weekDays } = useMemo(() => {
+    const { start, end } = getWeekWindow(currentWeek)
+    return { weekStart: start, weekEnd: end, weekDays: getWeekDays(start) }
+  }, [currentWeek])
 
   // Format time in hours and minutes
   const formatTime = (minutes: number) => {
@@ -135,33 +112,130 @@ export default function TrackRecord() {
     return `${hours}h ${mins}m`
   }
 
-  // Get week date range
+  // Get week date range (formatted)
   const getWeekRange = () => {
-    const today = new Date()
-    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + (currentWeek * 7)))
-    const endOfWeek = new Date(startOfWeek)
-    endOfWeek.setDate(startOfWeek.getDate() + 6)
-    
     return {
-      start: startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      end: endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      start: weekStart.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      end: weekEnd.toLocaleDateString("en-US", { month: "short", day: "numeric" })
     }
   }
 
-  // Simulate API fetch
-  const fetchWeeklyData = async (weekOffset: number) => {
+  /**
+   * Build dynamic weekly data from tasks and pomodoro sessions.
+   * If sessions are unavailable, focus metrics fall back to zeros.
+   */
+  const buildWeeklyData = async () => {
     setLoading(true)
-    // TODO: Replace with actual API call
-    // const response = await fetch(`/api/track-record?week=${weekOffset}`)
-    // const data = await response.json()
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    // For now, return mock data
-    setWeeklyData(mockWeeklyData)
-    setWeeklyStats(mockWeeklyStats)
-    setLoading(false)
+    try {
+      // Defensive guards for arrays
+      const allTasks = Array.isArray(tasks) ? tasks : []
+      const allSessions = Array.isArray(sessions) ? sessions : []
+
+      // Filter sessions within the selected week
+      const weekSessions = allSessions.filter((s) => {
+        const start = new Date(s.startTime)
+        return start >= weekStart && start <= weekEnd
+      })
+
+      // Helper to get friendly day name
+      const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const
+
+      // Build per-day records
+      const dayRecords: DayRecord[] = weekDays.map((dayDate) => {
+        const dayStart = startOfDay(dayDate)
+        const dayEnd = endOfDay(dayDate)
+
+        // Total tasks created that day (in week scope)
+        const tasksCreatedThatDay = allTasks.filter((t) => {
+          const created = new Date(t.createdAt)
+          return created >= dayStart && created <= dayEnd
+        })
+
+        // Tasks completed that day
+        const tasksCompletedThatDay = allTasks.filter((t) => {
+          if (t.status !== "completed") return false
+          const updated = new Date(t.updatedAt)
+          return updated >= dayStart && updated <= dayEnd
+        })
+
+        // Sessions associated that day
+        const sessionsThatDay = weekSessions.filter((s) => {
+          const start = new Date(s.startTime)
+          return start >= dayStart && start <= dayEnd
+        })
+
+        // Aggregate focus time (minutes) and count sessions
+        const totalFocusTimeMinutes = sessionsThatDay.reduce((sum, s) => sum + (typeof s.duration === "number" ? s.duration : 0), 0)
+        const focusSessionsCount = sessionsThatDay.length
+
+        // Productivity: completed / total tasks that day (0-100)
+        const totalTasksThatDay = tasksCreatedThatDay.length
+        const completedTasksThatDay = tasksCompletedThatDay.length
+        const productivityPercent = totalTasksThatDay > 0 ? Math.round((completedTasksThatDay / totalTasksThatDay) * 100) : 0
+
+        return {
+          date: dayDate.toISOString(),
+          dayName: dayNames[dayDate.getDay()],
+          focusSessions: focusSessionsCount,
+          totalFocusTime: totalFocusTimeMinutes,
+          tasksCompleted: completedTasksThatDay,
+          totalTasks: totalTasksThatDay,
+          breaksTaken: 0, // No break data available yet
+          productivity: productivityPercent,
+          streak: completedTasksThatDay > 0,
+        }
+      })
+
+      // Compute weekly aggregates
+      const totalSessions = dayRecords.reduce((sum, d) => sum + d.focusSessions, 0)
+      const totalFocusTime = dayRecords.reduce((sum, d) => sum + d.totalFocusTime, 0)
+      const totalTasks = dayRecords.reduce((sum, d) => sum + d.totalTasks, 0)
+      const completedTasks = dayRecords.reduce((sum, d) => sum + d.tasksCompleted, 0)
+      const averageProductivity = dayRecords.length > 0 ? Math.round(dayRecords.reduce((sum, d) => sum + d.productivity, 0) / dayRecords.length) : 0
+
+      // Determine best day (by productivity, tie-breaker: completed tasks)
+      const best = [...dayRecords].sort((a, b) => {
+        if (b.productivity !== a.productivity) return b.productivity - a.productivity
+        return b.tasksCompleted - a.tasksCompleted
+      })[0]
+
+      // Compute improvement vs last week (based on completed tasks)
+      const { start: prevStart, end: prevEnd } = getWeekWindow(currentWeek - 1)
+      const prevCompleted = allTasks.filter((t) => {
+        if (t.status !== "completed") return false
+        const updated = new Date(t.updatedAt)
+        return updated >= prevStart && updated <= prevEnd
+      }).length
+      const improvement = prevCompleted > 0 ? Math.round(((completedTasks - prevCompleted) / prevCompleted) * 100) : (completedTasks > 0 ? 100 : 0)
+
+      // Current streak within displayed week (consecutive days with completions ending at latest day <= today)
+      let currentStreak = 0
+      for (let i = dayRecords.length - 1; i >= 0; i--) {
+        const isFutureDay = new Date(dayRecords[i].date) > new Date()
+        if (isFutureDay && currentWeek === 0) continue
+        if (dayRecords[i].tasksCompleted > 0) {
+          currentStreak += 1
+        } else {
+          if (currentWeek === 0) break
+          // For past weeks, count streak within that window
+          break
+        }
+      }
+
+      setWeeklyData(dayRecords)
+      setWeeklyStats({
+        totalSessions,
+        totalFocusTime,
+        totalTasks,
+        completedTasks,
+        averageProductivity,
+        currentStreak,
+        bestDay: best ? new Date(best.date).toLocaleDateString("en-US", { weekday: "long" }) : "-",
+        improvement,
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Handle week navigation
@@ -169,13 +243,14 @@ export default function TrackRecord() {
     const newWeek = direction === 'prev' ? currentWeek - 1 : currentWeek + 1
     if (newWeek <= 0) { // Don't allow future weeks
       setCurrentWeek(newWeek)
-      fetchWeeklyData(newWeek)
     }
   }
 
   useEffect(() => {
-    fetchWeeklyData(currentWeek)
-  }, [currentWeek])
+    // Rebuild data whenever week, tasks, or sessions change
+    void buildWeeklyData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentWeek, tasks, sessions])
 
   const weekRange = getWeekRange()
 
@@ -219,12 +294,15 @@ export default function TrackRecord() {
         </div>
       </div>
 
-      {loading ? (
+      {(loading || isLoadingTasks || isLoadingSessions) ? (
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
         </div>
       ) : (
         <>
+          {tasksError && (
+            <div className="text-red-400 text-sm">Failed to load tasks. Please try again.</div>
+          )}
           {/* Weekly Overview Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="bg-gray-800/50 border-gray-700">
@@ -253,13 +331,13 @@ export default function TrackRecord() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-2xl font-bold text-blue-400">{formatTime(weeklyStats.totalFocusTime)}</div>
+                     <div className="text-2xl font-bold text-blue-400">{formatTime(weeklyStats.totalFocusTime)}</div>
                     <div className="text-sm text-gray-400">Focus Time</div>
                   </div>
                   <Clock className="w-8 h-8 text-blue-400" />
                 </div>
                 <div className="mt-2 text-xs text-gray-500">
-                  Avg: {formatTime(Math.round(weeklyStats.totalFocusTime / 7))} per day
+                   Avg: {formatTime(Math.round(weeklyStats.totalFocusTime / 7))} per day
                 </div>
               </CardContent>
             </Card>
@@ -274,7 +352,7 @@ export default function TrackRecord() {
                   <CheckCircle className="w-8 h-8 text-green-400" />
                 </div>
                 <div className="mt-2 text-xs text-gray-500">
-                  {weeklyStats.completedTasks}/{weeklyStats.totalTasks} total tasks
+                   {weeklyStats.completedTasks}/{weeklyStats.totalTasks} total tasks
                 </div>
               </CardContent>
             </Card>
@@ -387,7 +465,7 @@ export default function TrackRecord() {
                       Best Performance
                     </h4>
                     <p className="text-sm text-gray-300">
-                      Your most productive day was <strong>{weeklyStats.bestDay}</strong> with {weeklyData.find(d => d.dayName === 'Wed')?.productivity}% productivity!
+                      Your most productive day was <strong>{weeklyStats.bestDay}</strong> with {weeklyData.find(d => new Date(d.date).toLocaleDateString("en-US", { weekday: "long" }) === weeklyStats.bestDay)?.productivity ?? 0}% productivity!
                     </p>
                   </div>
 
@@ -397,7 +475,7 @@ export default function TrackRecord() {
                       Consistency
                     </h4>
                     <p className="text-sm text-gray-300">
-                      You maintained focus for an average of {formatTime(Math.round(weeklyStats.totalFocusTime / weeklyStats.totalSessions))} per session.
+                      You maintained focus for an average of {formatTime(Math.round(weeklyStats.totalFocusTime / Math.max(weeklyStats.totalSessions, 1)))} per session.
                     </p>
                   </div>
                 </div>
