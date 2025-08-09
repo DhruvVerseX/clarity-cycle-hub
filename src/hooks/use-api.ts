@@ -23,6 +23,9 @@ export const useTasks = () => {
     queryFn: taskApi.getAll,
     staleTime: 30000, // 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes
+    // Avoid indefinite loading when backend is down: fail fast and show error UI
+    retry: 0,
+    refetchOnWindowFocus: false,
   });
 
   const createTaskMutation = useMutation({

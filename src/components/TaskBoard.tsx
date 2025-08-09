@@ -26,11 +26,17 @@ export function TaskBoard() {
   } = useTasks();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newTask, setNewTask] = useState({
+  type NewTaskState = {
+    title: string;
+    description: string;
+    priority: "low" | "medium" | "high";
+    status: "todo" | "in-progress" | "completed";
+  };
+  const [newTask, setNewTask] = useState<NewTaskState>({
     title: "",
     description: "",
-    priority: "medium" as const,
-    status: "todo" as const
+    priority: "medium",
+    status: "todo"
   });
 
   const handleCreateTask = () => {
@@ -76,8 +82,8 @@ export function TaskBoard() {
     }
   };
 
-  const completedTasks = tasks.filter(task => task.status === "completed");
-  const pendingTasks = tasks.filter(task => task.status !== "completed");
+  const completedTasks = tasks.filter((task) => task.status === "completed");
+  const pendingTasks = tasks.filter((task) => task.status !== "completed");
 
   return (
     <Card className="glass-card animate-fade-in">
@@ -131,12 +137,15 @@ export function TaskBoard() {
                     id="task-priority"
                     value={newTask.priority}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                      // Define allowed priority values as a type
                       type TaskPriority = "low" | "medium" | "high";
-                      const allowedPriorities: TaskPriority[] = ["low", "medium", "high"];
+                      const allowedPriorities: readonly TaskPriority[] = ["low", "medium", "high"] as const;
                       const value: string = e.target.value;
-                      // Type guard to ensure only valid priority is set
-                      
+                      const isTaskPriority = (v: string): v is TaskPriority =>
+                        (allowedPriorities as readonly string[]).includes(v);
+                      setNewTask((prev) => ({
+                        ...prev,
+                        priority: isTaskPriority(value) ? value : prev.priority,
+                      }));
                     }}
                     className="w-full p-2 rounded-md bg-input/50 border border-border/50 text-foreground"
                   >
@@ -155,17 +164,16 @@ export function TaskBoard() {
                      */
                     id="task-status"
                     value={newTask.status}
-                    /**
-                     * Handles status change for new task.
-                     * Ensures only valid status values are set and type-checked.
-                     */
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                      // Define allowed status values as a type
                       type TaskStatus = "todo" | "in-progress" | "completed";
-                      const allowedStatuses: TaskStatus[] = ["todo", "in-progress", "completed"];
+                      const allowedStatuses: readonly TaskStatus[] = ["todo", "in-progress", "completed"] as const;
                       const value: string = e.target.value;
-                      // Type guard to ensure only valid status is set
-                      
+                      const isTaskStatus = (v: string): v is TaskStatus =>
+                        (allowedStatuses as readonly string[]).includes(v);
+                      setNewTask((prev) => ({
+                        ...prev,
+                        status: isTaskStatus(value) ? value : prev.status,
+                      }));
                     }}
                     className="w-full p-2 rounded-md bg-input/50 border border-border/50 text-foreground"
                   >
@@ -353,7 +361,7 @@ export function TaskBoard() {
           </div>
         )}
 
-        {tasks.length === 0 && (
+        {(!isLoading && !error && tasks.length === 0) && (
           <div className="text-center py-12">
             <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-card/50 flex items-center justify-center">
               <Plus className="w-12 h-12 text-muted-foreground" />
